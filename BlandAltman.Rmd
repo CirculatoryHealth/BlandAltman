@@ -1,0 +1,423 @@
+---
+title: "BlandAltman."
+author: "[Sander W. van der Laan, PhD](https://swvanderlaan.github.io) | @swvanderlaan | s.w.vanderlaan@gmail.com"
+date: "`r Sys.Date()`"
+output:
+  html_notebook: 
+    cache: yes
+    code_folding: hide
+    collapse: yes
+    df_print: paged
+    fig.align: center
+    fig_caption: yes
+    fig_height: 6
+    fig_retina: 2
+    fig_width: 7
+    highlight: haddock
+    theme: paper
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+mainfont: Arial
+subtitle: "plotting some differences"
+#editor_options:
+#  chunk_output_type: console
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+```{r global_options, include = FALSE}
+# further define some knitr-options.
+knitr::opts_chunk$set(fig.width = 12, fig.height = 8, fig.path = 'Figures/', 
+                      wwarning = TRUE, # show warnings during codebook generation
+  message = TRUE, # show messages during codebook generation
+  error = TRUE, # do not interrupt codebook generation in case of errors,
+                # usually better for debugging
+  echo = TRUE,  # show R code
+                      eval = TRUE)
+ggplot2::theme_set(ggplot2::theme_minimal())
+pander::panderOptions("table.split.table", Inf)
+```
+
+# Introduction
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to play around with the BlandAltman function, `BlandAltmanLeh`. 
+
+# Setup
+We will clean the environment, setup the locations, define colors, and create a datestamp.
+
+_Clean the environment._
+```{r echo = FALSE}
+rm(list = ls())
+```
+
+_Set locations and working directories..._
+```{r LocalSystem, echo = FALSE}
+### Operating System Version
+### Mac Pro
+# ROOT_loc = "/Volumes/EliteProQx2Media"
+# GENOMIC_loc = "/Users/svanderlaan/iCloud/Genomics"
+# AEDB_loc = paste0(GENOMIC_loc, "/AE-AAA_GS_DBs")
+# LAB_loc = paste0(GENOMIC_loc, "/LabBusiness")
+# PROJECT_loc = paste0(ROOT_loc, "/PLINK/analyses/baseline")
+
+### MacBook
+ROOT_loc = "/Users/swvanderlaan"
+GENOMIC_loc = paste0(ROOT_loc, "/iCloud/Genomics")
+AEDB_loc = paste0(GENOMIC_loc, "/AE-AAA_GS_DBs")
+LAB_loc = paste0(GENOMIC_loc, "/LabBusiness")
+PROJECT_loc = paste0(ROOT_loc, "/PLINK/analyses/baseline")
+
+### SOME VARIABLES WE NEED DOWN THE LINE
+TRAIT_OF_INTEREST = "BLANDALTMAN" # Phenotype
+PROJECTNAME = "bland_altman"
+
+cat("\nCreate a new analysis directory...\n")
+ifelse(!dir.exists(file.path(PROJECT_loc, "/",PROJECTNAME)), 
+       dir.create(file.path(PROJECT_loc, "/",PROJECTNAME)), 
+       FALSE)
+ANALYSIS_loc = paste0(PROJECT_loc,"/",PROJECTNAME)
+ifelse(!dir.exists(file.path(ANALYSIS_loc, "/PLOTS")), 
+       dir.create(file.path(ANALYSIS_loc, "/PLOTS")), 
+       FALSE)
+PLOT_loc = paste0(ANALYSIS_loc,"/PLOTS")
+ifelse(!dir.exists(file.path(PLOT_loc, "/QC")), 
+       dir.create(file.path(PLOT_loc, "/QC")), 
+       FALSE)
+QC_loc = paste0(PLOT_loc,"/QC")
+ifelse(!dir.exists(file.path(ANALYSIS_loc, "/OUTPUT")), 
+       dir.create(file.path(ANALYSIS_loc, "/OUTPUT")), 
+       FALSE)
+OUT_loc = paste0(ANALYSIS_loc, "/OUTPUT")
+
+setwd(paste0(PROJECT_loc))
+getwd()
+list.files()
+
+```
+
+_... a package-installation function ..._
+```{r Function: installations}
+install.packages.auto <- function(x) { 
+  x <- as.character(substitute(x)) 
+  if (isTRUE(x %in% .packages(all.available = TRUE))) { 
+    eval(parse(text = sprintf("require(\"%s\")", x)))
+  } else { 
+    # Update installed packages - this may mean a full upgrade of R, which in turn
+    # may not be warrented. 
+    #update.packages(ask = FALSE) 
+    eval(parse(text = sprintf("install.packages(\"%s\", dependencies = TRUE, repos = \"http://cran-mirror.cs.uu.nl/\")", x)))
+  }
+  if (isTRUE(x %in% .packages(all.available = TRUE))) { 
+    eval(parse(text = sprintf("require(\"%s\")", x)))
+  } else {
+    source("http://bioconductor.org/biocLite.R")
+    # Update installed packages - this may mean a full upgrade of R, which in turn
+    # may not be warrented.
+    #biocLite(character(), ask = FALSE) 
+    eval(parse(text = sprintf("biocLite(\"%s\")", x)))
+    eval(parse(text = sprintf("require(\"%s\")", x)))
+  }
+}
+```
+
+_... and load those packages._
+```{r loading_packages}
+install.packages.auto("readr")
+install.packages.auto("optparse")
+install.packages.auto("tools")
+install.packages.auto("dplyr")
+install.packages.auto("tidyr")
+install.packages.auto("naniar")
+
+# To get 'data.table' with 'fwrite' to be able to directly write gzipped-files
+# Ref: https://stackoverflow.com/questions/42788401/is-possible-to-use-fwrite-from-data-table-with-gzfile
+# install.packages("data.table", repos = "https://Rdatatable.gitlab.io/data.table")
+library(data.table)
+
+install.packages.auto("tidyverse")
+install.packages.auto("knitr")
+install.packages.auto("DT")
+
+# Codebook: 
+# How to Automatically Document Data With the codebook Package to Facilitate Data Reuse. Ruben C. Arslan.
+# Ruben C. Arslan, Center for Adaptive Rationality, Max Planck Institute for Human Development, 14195 Berlin, Germany E-mail: ruben.arslan@gmail.com
+# Link: https://doi.org/10.1177/2515245919838783
+# install.packages.auto("codebook") # to make a code book of SPSS files
+
+install.packages.auto("BlandAltmanLeh")
+
+install.packages.auto("ggplot2")
+
+```
+
+_We will create a datestamp and define the Utrecht Science Park Colour Scheme_.
+```{r Setting: Colors}
+
+Today = format(as.Date(as.POSIXlt(Sys.time())), "%Y%m%d")
+Today.Report = format(as.Date(as.POSIXlt(Sys.time())), "%A, %B %d, %Y")
+
+### UtrechtScienceParkColoursScheme
+###
+### WebsitetoconvertHEXtoRGB:http://hex.colorrrs.com.
+### Forsomefunctionsyoushoulddividethesenumbersby255.
+###
+###	No.	Color			      HEX	(RGB)						              CHR		  MAF/INFO
+###---------------------------------------------------------------------------------------
+###	1	  yellow			    #FBB820 (251,184,32)				      =>	1		or 1.0>INFO
+###	2	  gold			      #F59D10 (245,157,16)				      =>	2		
+###	3	  salmon			    #E55738 (229,87,56)				      =>	3		or 0.05<MAF<0.2 or 0.4<INFO<0.6
+###	4	  darkpink		    #DB003F ((219,0,63)				      =>	4		
+###	5	  lightpink		    #E35493 (227,84,147)				      =>	5		or 0.8<INFO<1.0
+###	6	  pink			      #D5267B (213,38,123)				      =>	6		
+###	7	  hardpink		    #CC0071 (204,0,113)				      =>	7		
+###	8	  lightpurple	    #A8448A (168,68,138)				      =>	8		
+###	9	  purple			    #9A3480 (154,52,128)				      =>	9		
+###	10	lavendel		    #8D5B9A (141,91,154)				      =>	10		
+###	11	bluepurple		  #705296 (112,82,150)				      =>	11		
+###	12	purpleblue		  #686AA9 (104,106,169)			      =>	12		
+###	13	lightpurpleblue	#6173AD (97,115,173/101,120,180)	=>	13		
+###	14	seablue			    #4C81BF (76,129,191)				      =>	14		
+###	15	skyblue			    #2F8BC9 (47,139,201)				      =>	15		
+###	16	azurblue		    #1290D9 (18,144,217)				      =>	16		or 0.01<MAF<0.05 or 0.2<INFO<0.4
+###	17	lightazurblue	  #1396D8 (19,150,216)				      =>	17		
+###	18	greenblue		    #15A6C1 (21,166,193)				      =>	18		
+###	19	seaweedgreen	  #5EB17F (94,177,127)				      =>	19		
+###	20	yellowgreen		  #86B833 (134,184,51)				      =>	20		
+###	21	lightmossgreen	#C5D220 (197,210,32)				      =>	21		
+###	22	mossgreen		    #9FC228 (159,194,40)				      =>	22		or MAF>0.20 or 0.6<INFO<0.8
+###	23	lightgreen	  	#78B113 (120,177,19)				      =>	23/X
+###	24	green			      #49A01D (73,160,29)				      =>	24/Y
+###	25	grey			      #595A5C (89,90,92)				        =>	25/XY	or MAF<0.01 or 0.0<INFO<0.2
+###	26	lightgrey		    #A2A3A4	(162,163,164)			      =>	26/MT
+###
+###	ADDITIONAL COLORS
+###	27	midgrey			#D7D8D7
+###	28	verylightgrey	#ECECEC"
+###	29	white			#FFFFFF
+###	30	black			#000000
+###----------------------------------------------------------------------------------------------
+
+uithof_color = c("#FBB820","#F59D10","#E55738","#DB003F","#E35493","#D5267B",
+                 "#CC0071","#A8448A","#9A3480","#8D5B9A","#705296","#686AA9",
+                 "#6173AD","#4C81BF","#2F8BC9","#1290D9","#1396D8","#15A6C1",
+                 "#5EB17F","#86B833","#C5D220","#9FC228","#78B113","#49A01D",
+                 "#595A5C","#A2A3A4", "#D7D8D7", "#ECECEC", "#FFFFFF", "#000000")
+
+uithof_color_legend = c("#FBB820", "#F59D10", "#E55738", "#DB003F", "#E35493",
+                        "#D5267B", "#CC0071", "#A8448A", "#9A3480", "#8D5B9A",
+                        "#705296", "#686AA9", "#6173AD", "#4C81BF", "#2F8BC9",
+                        "#1290D9", "#1396D8", "#15A6C1", "#5EB17F", "#86B833",
+                        "#C5D220", "#9FC228", "#78B113", "#49A01D", "#595A5C",
+                        "#A2A3A4", "#D7D8D7", "#ECECEC", "#FFFFFF", "#000000")
+### ----------------------------------------------------------------------------
+```
+
+# Data generation
+
+Generating some data to play with.
+
+```{r data}
+data.df <- data.frame(study_number = as.integer(unique(runif(n = 40, min = 1, max = 100))),
+                      sex = gl(2, 20, labels = c("females", "males")),
+                      m1 = c(-0.358, 0.788, 1.23, -0.338, -0.789, -0.255, 0.645, 0.506, 0.774, 
+                             -0.511, -0.517, -0.391, 0.681, -2.037, 2.019, -0.447, 0.122, -0.412, 1.273, -2.165),
+                      m2 = c(0.121, 1.322, 1.929, -0.339, -0.515, -0.029, 1.322, 0.951, 0.799, 
+                             -0.306, -0.158, 0.144, 1.132, -0.675, 2.534, -0.398, 0.537, 0.173, 1.508, -1.955)) 
+
+```
+
+# Plotting
+We can plot with `base()` or `ggplot2()`.
+
+## Base()
+```{r BasePlot}
+ba <- bland.altman.stats(data.df$m1, data.df$m2)
+plot(ba$means, ba$diffs, col = data.df$sex, ylim = c(-4,4))
+abline(h = ba$lines, lty = 2)
+```
+
+
+
+
+## bland.altman.plot()
+```{r BlandAltman BlandAltmanPlot}
+bland.altman.plot(data.df$m1, data.df$m2, 
+                  main = "This is a Bland Altman Plot", xlab = "Means", ylab = "Differences")
+```
+
+
+## GGplot()
+```{r BlandAltman GGPlot}
+pl <- bland.altman.plot(data.df$m1, data.df$m2, graph.sys = "ggplot2", conf.int = 0.95) + theme_minimal()
+print(pl)
+```
+
+## Stats
+
+We can also get some stats on our data.
+
+```{r stats}
+bland.altman.stats(data.df$m1, data.df$m2,
+                   two = 1.96, # numeric defines how many standard deviations from mean are to be computed, defaults to 1.96 as this gives proper 95 percent CI. However, in the original publication a factor of 2 is used.
+                   mode = 1, # if 1 then difference group1 minus group2 is used, if 2 then group2 minus group1 is used. Defaults to 1.
+                   conf.int = 0.95)
+```
+
+
+## NHANES
+
+We can also work with real data, from [*CDC NHANES (National Health and Nutrition Examination Survey)*](http://wwww.silentspring.org/RNHANES/index.html){target=_"blank"}.
+
+```{r Install NHANES}
+install.packages("RNHANES")
+```
+
+### Load NHANES data
+Here we load the environmental phenols and parabens
+```{r Load NHANES}
+library("RNHANES")
+# Download environmental phenols & parabens data from the 2011-2012 survey cycle
+dat <- nhanes_load_data("EPH", "2011-2012")
+
+# Download the same data, but this time include demographics data (which includes sample weights)
+dat <- nhanes_load_data("EPH", "2011-2012", demographics = TRUE)
+
+# Find the sample size for urinary triclosan
+nhanes_sample_size(dat,
+  column = "URXTRS",
+  comment_column = "URDTRSLC",
+  weights_column = "WTSA2YR")
+
+# Compute the detection frequency of urinary triclosan
+nhanes_detection_frequency(dat,
+  column = "URXTRS",
+  comment_column = "URDTRSLC",
+  weights_column = "WTSA2YR")
+
+# Compute 95th and 99th quantiles for urinary triclosan
+nhanes_quantile(dat,
+  column = "URXTRS",
+  comment_column = "URDTRSLC",
+  weights_column = "WTSA2YR",
+  quantiles = c(0.95, 0.99))
+  
+# Compute geometric mean of urinary triclosan
+# nhanes_geometric_mean(dat,
+#   column = "URXTRS",
+#   weights_column = "WTSA2YR")
+
+# Plot a histogram of the urinary triclosan distribution
+nhanes_hist(dat,
+  column = "URXTRS",
+  comment_column = "URDTRSLC",
+  weights_column = "WTSA2YR")
+
+# Build a survey design object for use with survey package
+design <- nhanes_survey_design(dat, weights_column = "WTSA2YR")
+
+```
+
+### Calculate means
+
+
+```{r NHANES means}
+library(survey)
+library(RNHANES)
+library(tidyverse)
+
+dat <- nhanes_load_data("EPHPP_H", "2013-2014", demographics = TRUE) %>%
+  filter(!is.na(URXBPH))
+
+des <- nhanes_survey_design(dat, "WTSB2YR")
+
+logmean <- svymean(~log(URXBPH), des, na.rm = TRUE)
+
+# Geometric mean lower 95% confidence interval
+exp(logmean[1] - 1.96 * sqrt(attr(logmean, "var")))
+
+# Geometric mean
+exp(logmean)[1]
+
+# Geometric mean upper 95% confidence interval
+exp(logmean[1] + 1.96 * sqrt(attr(logmean, "var")))
+
+```
+
+
+### BlandAltman
+
+```{r NHANES bland_altman}
+
+bland.altman.stats(dat$URXBPH, dat$URXBP3,
+                   two = 1.96, # numeric defines how many standard deviations from mean are to be computed, defaults to 1.96 as this gives proper 95 percent CI. However, in the original publication a factor of 2 is used.
+                   mode = 1, # if 1 then difference group1 minus group2 is used, if 2 then group2 minus group1 is used. Defaults to 1.
+                   conf.int = 0.95)
+
+bland.altman.plot(dat$URXBPH, dat$URXBPS, 
+                  main = "This is a Bland Altman Plot", xlab = "Means", ylab = "Differences")
+
+```
+
+
+
+
+# R Markdown Notebook Tutorial
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+plot(cars)
+
+bland.altman.stats(cars$dist, cars$speed,
+                   two = 1.96, # numeric defines how many standard deviations from mean are to be computed, defaults to 1.96 as this gives proper 95 percent CI. However, in the original publication a factor of 2 is used.
+                   mode = 1, # if 1 then difference group1 minus group2 is used, if 2 then group2 minus group1 is used. Defaults to 1.
+                   conf.int = 0.95)
+
+bland.altman.plot(cars$dist, cars$speed, 
+                  main = "This is a Bland Altman Plot", xlab = "Means", ylab = "Differences")
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+
+# Session information
+
+Let's save the information from our sesssion. This is good practice, this way you (and others) always know what the specific version numbers were of `r` and the packages you used.
+
+------
+
+    Version:      v1.0.0
+    Last update:  2020-03-13
+    Written by:   Sander W. van der Laan (s.w.vanderlaan-2[at]umcutrecht.nl).
+    Description:  Script to play around with the BlandAltman function.
+    Minimum requirements: R version 3.4.3 (2017-06-30) -- 'Single Candle', Mac OS X El Capitan
+
+------
+
+```{r eval = TRUE}
+sessionInfo()
+```
+
+# Saving environment
+
+If we want we can also save the environment.
+```{r Saving}
+save.image(paste0(OUT_loc, "/",Today,".",PROJECTNAME,".RData"))
+```
+
+
+------
+<sup>&copy; 1979-2020 Sander W. van der Laan | s.w.vanderlaan[at]gmail.com | [swvanderlaan.github.io](https://swvanderlaan.github.io).</sup>
+------
+
+
