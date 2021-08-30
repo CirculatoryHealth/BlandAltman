@@ -89,6 +89,14 @@ LICENSE           | User permissions           | Read only
 .worcs            | WORCS metadata YAML        | Read only     
 prepare_data.R    | Script to process raw data | Human editable
 renv.lock         | Reproducible R environment | Read only     
+File              | Description                | Usage         
+----------------- | -------------------------- | --------------
+README.md         | Description of project     | Human editable
+BlandAltman.Rproj | Project file               | Loads project 
+LICENSE           | User permissions           | Read only     
+.worcs            | WORCS metadata YAML        | Read only     
+prepare_data.R    | Script to process raw data | Human editable
+renv.lock         | Reproducible R environment | Read only     
 File                       | Description                         | Usage         
 -------------------------- | ----------------------------------- | --------------
 README.md                  | Description of project              | Human editable
