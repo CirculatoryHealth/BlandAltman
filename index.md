@@ -1,4 +1,9 @@
-## Welcome to GitHub Pages
+## Welcome to BlandAltman
+
+This is an example GitHub repository with an example webpage to show the possibilities when starting a repository for a scientific project at the UMC Utrecht. Please refer to the project's [`readme`](https://github.com/CirculatoryHealth/BlandAltman) for more information.
+
+
+### Creating pages
 
 You can use the [editor on GitHub](https://github.com/CirculatoryHealth/BlandAltman/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
