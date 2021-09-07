@@ -55,19 +55,13 @@ rm(list = ls())
 _Set locations and working directories..._
 ```{r LocalSystem, echo = FALSE}
 ### Operating System Version
-### Mac Pro
-# ROOT_loc = "/Volumes/EliteProQx2Media"
-# GENOMIC_loc = "/Users/svanderlaan/iCloud/Genomics"
-# AEDB_loc = paste0(GENOMIC_loc, "/AE-AAA_GS_DBs")
-# LAB_loc = paste0(GENOMIC_loc, "/LabBusiness")
-# PROJECT_loc = paste0(ROOT_loc, "/PLINK/analyses/baseline")
 
 ### MacBook
 ROOT_loc = "/Users/swvanderlaan"
-GENOMIC_loc = paste0(ROOT_loc, "/iCloud/Genomics")
-AEDB_loc = paste0(GENOMIC_loc, "/AE-AAA_GS_DBs")
+GENOMIC_loc = paste0(ROOT_loc, "/OneDrive - UMC Utrecht/Genomics")
+AEDB_loc = paste0(GENOMIC_loc, "/Athero-Express/AE-AAA_GS_DBs")
 LAB_loc = paste0(GENOMIC_loc, "/LabBusiness")
-PROJECT_loc = paste0(ROOT_loc, "/PLINK/analyses/baseline")
+PROJECT_loc = paste0(ROOT_loc, "/PLINK/analyses/atheroexpress/BlandAltman")
 
 ### SOME VARIABLES WE NEED DOWN THE LINE
 TRAIT_OF_INTEREST = "BLANDALTMAN" # Phenotype
@@ -123,7 +117,7 @@ install.packages.auto <- function(x) {
 ```
 
 _... and load those packages._
-```{r loading_packages}
+```{r loading_packages, message=FALSE, warning=FALSE}
 install.packages.auto("readr")
 install.packages.auto("optparse")
 install.packages.auto("tools")
@@ -252,6 +246,7 @@ bland.altman.plot(data.df$m1, data.df$m2,
 ```{r BlandAltman GGPlot}
 pl <- bland.altman.plot(data.df$m1, data.df$m2, graph.sys = "ggplot2", conf.int = 0.95) + theme_minimal()
 print(pl)
+
 ```
 
 ## Stats
@@ -297,11 +292,17 @@ nhanes_detection_frequency(dat,
   weights_column = "WTSA2YR")
 
 # Compute 95th and 99th quantiles for urinary triclosan
-nhanes_quantile(dat,
-  column = "URXTRS",
-  comment_column = "URDTRSLC",
-  weights_column = "WTSA2YR",
-  quantiles = c(0.95, 0.99))
+# I don't understand - somehow this does not work anymore. 
+# The message we get:
+# Error in match.arg(interval.type) : 
+#   'arg' should be one of “mean”, “beta”, “xlogit”, “asin”, “score”
+
+# nhanes_quantile(dat,
+#   column = "URXTRS",
+#   comment_column = "URDTRSLC",
+#   weights_column = "WTSA2YR",
+#   quantiles = c(0.5, 0.95, 0.99))
+
   
 # Compute geometric mean of urinary triclosan
 # nhanes_geometric_mean(dat,
@@ -396,12 +397,15 @@ Let's save the information from our sesssion. This is good practice, this way yo
 
 ------
 
-    Version:      v1.0.0
-    Last update:  2020-03-13
+    Version:      v1.0.1
+    Last update:  2021-09-07
     Written by:   Sander W. van der Laan (s.w.vanderlaan-2[at]umcutrecht.nl).
     Description:  Script to play around with the BlandAltman function.
     Minimum requirements: R version 3.4.3 (2017-06-30) -- 'Single Candle', Mac OS X El Capitan
 
+    Versions
+    * 1.0.1 Updates to the environment and the repository.
+    * 1.0.0 Initial version.
 ------
 
 ```{r eval = TRUE}
@@ -417,7 +421,7 @@ save.image(paste0(OUT_loc, "/",Today,".",PROJECTNAME,".RData"))
 
 
 ------
-<sup>&copy; 1979-2020 Sander W. van der Laan | s.w.vanderlaan[at]gmail.com | [swvanderlaan.github.io](https://swvanderlaan.github.io).</sup>
+<sup>&copy; 1979-2021 Sander W. van der Laan | s.w.vanderlaan[at]gmail.com | [swvanderlaan.github.io](https://swvanderlaan.github.io).</sup>
 ------
 
 
