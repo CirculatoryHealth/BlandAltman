@@ -100,7 +100,7 @@ Please refer to the vignette on [reproducing a WORCS project]() for step by step
 
 Dr. Sander W. van der Laan is funded through grants from the Netherlands CardioVascular Research Initiative of the Netherlands Heart Foundation (CVON 2011/B019 and CVON 2017-20: Generating the best evidence-based pharmaceutical targets for atherosclerosis [GENIUS I&II]). We are thankful for the support of the ERA-CVD program ‘druggable-MI-targets’ (grant number: 01KL1802), the EU H2020 TO_AITION (grant number: 848146), and the Leducq Fondation ‘PlaqOmics’. Dr. Anita Study, Prof. dr. Sjaak Ethicus, and Prof. dr. Liv Bio are funded through the UMC Utrecht.
 
-Samples are obtained during surgery as part of the [Awesome Biobank Study](http:www.awesomebiobankstudy.nl) which is an ongoing study in the UMC Utrecht.
+Samples are obtained during surgery as part of the [Awesome Biobank Study]() which is an ongoing study in the UMC Utrecht.
 
 The framework was based on the [`WORCS` package](https://osf.io/zcvbs/).
 
