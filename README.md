@@ -45,9 +45,9 @@ Randomly generated dataset.
 
 Regular Bland-Altman test.
 
-![Bland-Altman plot of 3 clinicians' ratings of burn size, using two different methods](images/Bland-altman_plot_of_three_clinicians'_ratings_of_burn_size,_using_two_different_methods_small.png)
+![Bland-Altman plot](images/Bland-altman_plot_of_three_clinicians'_ratings_of_burn_size,_using_two_different_methods_small.png)
 
-(This image was taken from [Wiki](https://commons.wikimedia.org/wiki/File:Bland-altman_plot_of_three_clinicians%27_ratings_of_burn_size,_using_two_different_methods.png).
+**Bland-Altman plot of 3 clinicians' ratings of burn size, using two different methods.** This image was taken from [Wiki](https://commons.wikimedia.org/wiki/File:Bland-altman_plot_of_three_clinicians%27_ratings_of_burn_size,_using_two_different_methods.png).
 
 
 ## Where do I start?
