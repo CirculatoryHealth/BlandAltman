@@ -5,15 +5,12 @@
 
 none
 
-*Athero-Express Team*
+*Awesome Biobank Study Team*
 
 Sander W. van der Laan, 
-Arjan Boltjes, 
-Michal Mokry, 
-Hester den Ruijter, 
-Folkert W. Asselbergs, 
-Gert Jan de Borst, 
-Gerard Pasterkamp.
+Anita Study,
+Sjaak Ethicus,
+Liv Bio.
 
 **Project ID**
 
@@ -77,12 +74,9 @@ scripts                    | Location of scripts                 | Read only
 
 # Reproducibility
 
-This project uses the Workflow for Open Reproducible Code in Science (WORCS) to
-ensure transparency and reproducibility. The workflow is designed to meet the
-principles of Open Science throughout a research project. 
+This project uses the Workflow for Open Reproducible Code in Science (WORCS) to ensure transparency and reproducibility. The workflow is designed to meet the principles of Open Science throughout a research project. 
 
-To learn how WORCS helps researchers meet the TOP-guidelines and FAIR principles,
-read the preprint at https://osf.io/zcvbs/
+To learn how WORCS helps researchers meet the TOP-guidelines and FAIR principles, read the preprint at https://osf.io/zcvbs/
 
 
 ## WORCS: Advice for authors
@@ -104,9 +98,9 @@ Please refer to the vignette on [reproducing a WORCS project]() for step by step
 
 # Acknowledgements
 
-Dr. Sander W. van der Laan is funded through grants from the Netherlands CardioVascular Research Initiative of the Netherlands Heart Foundation (CVON 2011/B019 and CVON 2017-20: Generating the best evidence-based pharmaceutical targets for atherosclerosis [GENIUS I&II]). We are thankful for the support of the ERA-CVD program ‘druggable-MI-targets’ (grant number: 01KL1802), the EU H2020 TO_AITION (grant number: 848146), and the Leducq Fondation ‘PlaqOmics’.
+Dr. Sander W. van der Laan is funded through grants from the Netherlands CardioVascular Research Initiative of the Netherlands Heart Foundation (CVON 2011/B019 and CVON 2017-20: Generating the best evidence-based pharmaceutical targets for atherosclerosis [GENIUS I&II]). We are thankful for the support of the ERA-CVD program ‘druggable-MI-targets’ (grant number: 01KL1802), the EU H2020 TO_AITION (grant number: 848146), and the Leducq Fondation ‘PlaqOmics’. Dr. Anita Study, Prof. dr. Sjaak Ethicus, and Prof. dr. Liv Bio are funded through the UMC Utrecht.
 
-Plaque samples are derived from carotid endarterectomies as part of the [Athero-Express Biobank Study](http:www/atheroexpress.nl) which is an ongoing study in the UMC Utrecht.
+Samples are obtained during surgery as part of the [Awesome Biobank Study](http:www.awesomebiobankstudy.nl) which is an ongoing study in the UMC Utrecht.
 
 The framework was based on the [`WORCS` package](https://osf.io/zcvbs/).
 
@@ -115,13 +109,14 @@ The framework was based on the [`WORCS` package](https://osf.io/zcvbs/).
 
 #### Changes log
 
-    Version:      v1.0.1
-    Last update:  2021-08-30
+    Version:      v1.0.2
+    Last update:  2021-09-07
     Written by:   Sander W. van der Laan (s.w.vanderlaan-2[at]umcutrecht.nl).
     Description:  Script to do a Bland-Altman test and make some figures.
     Minimum requirements: R version 3.4.3 (2017-06-30) -- 'Single Candle', Mac OS X El Capitan
     
     Changes log
+    * v1.0.2 Some small edits to the readme, and the .gitignore.
     * v1.0.1 Added some information to this readme.
     * v1.0.0 Initial version. 
     
